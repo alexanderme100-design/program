@@ -85,7 +85,9 @@
     .calendar-day.today.selected { color: white; }
     .calendar-day.today.selected::after { background-color: white; }
     .calendar-day.is-disabled { color: #C7C7CC; text-decoration: line-through; opacity: 0.5; cursor: not-allowed; }
-    .calendar-day.is-holiday { color: #ff9a9a; }
+    /* 不供餐日樣式 (紅色) */
+    .calendar-day.is-holiday { color: #FF3B30; }
+    /* 補班日樣式 */
     .calendar-day.makeup-day { background-color: #FEF3C7; color: #D97706; }
     .calendar-day.makeup-day.selected { background-color: #007AFF; color: white; }
     
@@ -106,7 +108,7 @@
   <div id="adminBar" class="hidden fixed top-0 left-0 w-full z-40 admin-bar shadow-md p-3 flex items-center justify-between animate-fade-in">
     <div class="flex items-center">
       <span class="bg-white text-red-600 text-xs px-2 py-1 rounded-md font-bold mr-2">ADMIN</span>
-      <span class="text-sm font-medium">不供餐日設定模式：請點選「不供餐」的日期</span>
+      <span class="text-sm font-medium">不供餐日設定模式：請點選日期標示為「不供餐」</span>
     </div>
     <div class="flex space-x-2">
         <button onclick="saveAdminHolidays()" class="bg-white hover:bg-gray-100 text-red-600 text-xs px-3 py-2 rounded-lg transition-colors font-bold shadow-sm">儲存設定</button>
@@ -226,7 +228,7 @@
     </form>
     
     <div class="max-w-2xl mx-auto my-8 px-2 text-center">
-        <button onclick="toggleAdminMode()" class="text-xs text-gray-300 hover:text-gray-500 transition-colors"><i class="fa-solid fa-gear mr-1"></i> 管理員設定 (假日/不供餐日)</button>
+        <button onclick="toggleAdminMode()" class="text-xs text-gray-300 hover:text-gray-500 transition-colors"><i class="fa-solid fa-gear mr-1"></i> 管理員設定 (設定不供餐日)</button>
     </div>
 
     <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -301,7 +303,7 @@
             renderCalendar();
         })
         .catch(err => {
-            console.warn("無法載入假日設定:", err.message);
+            console.warn("無法載入不供餐日設定:", err.message);
             calculateDeadlineRule();
             renderCalendar();
         });
@@ -327,7 +329,7 @@
                     adminBar.classList.remove('hidden');
                     adminHolidaySet = new Set(HOLIDAYS);
                     document.body.classList.add('admin-mode');
-                    hint.innerText = "點擊日期標示為「不供餐」(紅色)";
+                    hint.innerText = "點擊日期來標示為「不供餐」(紅色)";
                     hint.classList.replace('text-gray-400', 'text-red-500');
                     renderCalendar();
                 } else {
@@ -341,7 +343,6 @@
         }
     }
 
-    // --- 重要修正: 確保退出管理員模式時，畫面同步更新 ---
     function exitAdminMode(shouldRefresh = false) {
         isAdminMode = false;
         adminPassword = ""; 
@@ -354,18 +355,16 @@
         hint.innerText = "點擊灰色日期可查看原因";
         hint.classList.replace('text-red-500', 'text-gray-400');
         
-        // 關鍵：先用目前的記憶體資料 (HOLIDAYS) 強制重算一次邏輯與重繪
         calculateDeadlineRule();
         renderCalendar();
         
-        // 如果是取消操作，才需要從伺服器拉回舊資料，避免畫面跳動
         if (shouldRefresh) {
             fetchHolidays();
         }
     }
 
     function saveAdminHolidays() {
-        if (!confirm("確定要儲存這些不供餐日設定嗎？")) return;
+        if (!confirm("確定要儲存這些設定嗎？")) return;
         
         const newHolidays = Array.from(adminHolidaySet).sort();
         document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -375,9 +374,7 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
             if (data.result === 'success') {
                 alert("設定已儲存！");
-                // 1. 立即更新本地變數，這是最關鍵的一步
                 HOLIDAYS = newHolidays; 
-                // 2. 呼叫退出，並傳入 false 代表「不要去伺服器拉資料」，直接用剛剛更新的 HOLIDAYS
                 exitAdminMode(false); 
             } else {
                 alert("儲存失敗：" + data.error);
@@ -482,10 +479,19 @@
         const isMakeup = MAKEUP_DAYS.includes(dateStr); 
         
         if (dateObj.toDateString() === today.toDateString()) btn.classList.add('today');
-        if (isMakeup) btn.classList.add('makeup-day');
-        else if (isWeekend || isHoliday) {
+        
+        // --- 優先權邏輯修正：不供餐日(isHoliday) 最大，無論是否為補班日 ---
+        if (isHoliday) {
+            // 不供餐日 (紅色) - 最高優先級
             btn.style.color = "#FF3B30";
-            if(isHoliday) { if(isAdminMode) btn.classList.add('is-holiday-setting'); else btn.classList.add('is-holiday'); }
+            if(isAdminMode) btn.classList.add('is-holiday-setting'); 
+            else btn.classList.add('is-holiday');
+        } else if (isMakeup) {
+            // 補班日 (黃色) - 僅在非不供餐日顯示
+            btn.classList.add('makeup-day');
+        } else if (isWeekend) {
+            // 一般週末 (紅色)
+            btn.style.color = "#FF3B30";
         }
         
         if (isAdminMode) {
@@ -498,9 +504,22 @@
             const thresholdDate = new Date(earliestValidDateObj); thresholdDate.setHours(0,0,0,0);
             let isDisabled = false;
             let disableReason = "";
-            if (compareDate < thresholdDate) { isDisabled = true; disableReason = `已超過申請期限\n(需於 ${formatDateSimple(earliestValidDateObj)} (含)以後才可退費)`; }
-            else if (!isMakeup && isHoliday) { isDisabled = true; disableReason = "非供餐日 (假日/國定假日/補假)"; }
-            else if (!isMakeup && isWeekend) { isDisabled = true; disableReason = "非供餐日 (週末)"; }
+
+            // --- 禁用邏輯修正 ---
+            if (compareDate < thresholdDate) { 
+                isDisabled = true; 
+                disableReason = `已超過申請期限\n(需於 ${formatDateSimple(earliestValidDateObj)} (含)以後才可退費)`; 
+            }
+            else if (isHoliday) { 
+                // 只要是「不供餐日」，一律禁用
+                isDisabled = true; 
+                disableReason = "非供餐日 (假日/國定假日/學校活動)"; 
+            }
+            else if (!isMakeup && isWeekend) { 
+                // 只有在「非補班日」的週末才禁用
+                isDisabled = true; 
+                disableReason = "非供餐日 (週末)"; 
+            }
 
             if (isDisabled) {
               btn.classList.add('is-disabled');
@@ -637,4 +656,3 @@
   </script>
 </body>
 </html>
-
