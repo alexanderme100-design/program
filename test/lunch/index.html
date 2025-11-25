@@ -39,6 +39,7 @@
 
     /* Calendar Styling */
     .calendar-day { border-radius: 50%; font-weight: 500; position: relative; transition: all 0.1s; }
+    
     /* 選中狀態 (藍底白字) */
     .calendar-day.selected { background-color: #007AFF !important; color: white !important; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); }
     
@@ -48,24 +49,36 @@
     .calendar-day.today.selected { color: white; }
     .calendar-day.today.selected::after { background-color: white; }
 
-    /* 禁用狀態 (優先權最高) */
+    /* 禁用狀態 (優先權最高，強制覆蓋其他顏色) */
     .calendar-day.is-disabled { 
-        color: #C7C7CC !important; 
+        color: #D1D5DB !important; /* 淺灰色 */
         text-decoration: line-through; 
-        opacity: 0.6; 
-        cursor: not-allowed; 
+        opacity: 0.7; 
+        cursor: not-allowed !important; 
         background-color: transparent !important;
+        border: 1px solid transparent;
     }
     
-    /* 假日樣式 (紅字) */
-    .calendar-day.holiday-text { color: #FF3B30; }
+    /* 特殊：被設定為假日的不供餐日 (即使過期也要顯示紅色，但不可選) */
+    .calendar-day.holiday-locked { 
+        color: #FF3B30 !important; /* 強制紅色 */
+        text-decoration: line-through;
+        opacity: 0.6;
+        cursor: not-allowed !important;
+    }
     
     /* 補班日 (黃底) */
     .calendar-day.makeup-day { background-color: #FEF3C7; color: #D97706; }
 
-    /* 管理員模式 */
+    /* 管理員模式：設定中的假日 */
     .admin-mode .calendar-day { cursor: pointer !important; opacity: 1 !important; text-decoration: none !important; }
-    .admin-mode .calendar-day.is-holiday-setting { background-color: #FF3B30 !important; color: white !important; font-weight: bold; border: none; }
+    .admin-mode .calendar-day.is-holiday-setting { 
+        background-color: #FF3B30 !important; 
+        color: white !important; 
+        font-weight: bold; 
+        border: none; 
+        box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+    }
     .admin-bar { background: linear-gradient(to right, #b91c1c, #dc2626); color: white; }
 
     .required::after { content: " *"; color: #FF3B30; }
@@ -87,17 +100,25 @@
   </div>
 
   <div class="max-w-2xl mx-auto my-6 px-3 sm:px-6 pt-4">
+    <!-- Header -->
     <div class="mb-6 text-center sm:text-left">
       <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center justify-center sm:justify-start">
-        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md"><i class="fa-solid fa-utensils text-lg"></i></div>
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md">
+           <i class="fa-solid fa-utensils text-lg"></i>
+        </div>
         午餐停餐/退費申請
       </h1>
       <p class="text-gray-500 mt-1 ml-1 font-medium">每餐退費標準 $60</p>
     </div>
 
+    <!-- 規則 -->
     <div class="ios-card p-4 sm:p-5 mb-6 bg-blue-50/50 border-blue-100">
-      <h3 class="font-bold text-blue-600 mb-3 flex items-center text-sm uppercase tracking-wide"><i class="fa-solid fa-circle-info mr-2"></i> 申請規則與須知</h3>
-      <div id="rule-display" class="mb-4 bg-white p-3 rounded-xl border border-blue-100 shadow-sm"><p class="text-xs text-gray-400 mb-1">系統自動計算截算日...</p></div>
+      <h3 class="font-bold text-blue-600 mb-3 flex items-center text-sm uppercase tracking-wide">
+        <i class="fa-solid fa-circle-info mr-2"></i> 申請規則與須知
+      </h3>
+      <div id="rule-display" class="mb-4 bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+         <p class="text-xs text-gray-400 mb-1">系統自動計算截算日...</p>
+      </div>
       <ul class="space-y-3 text-sm text-gray-700">
         <li class="flex items-start"><span class="text-blue-500 mr-3 flex-shrink-0 text-lg leading-none mt-0.5">•</span><span class="flex-1 leading-relaxed">請於停餐日往前<strong class="text-gray-900 mx-0.5">第 2 個工作日下午 1:00 前</strong>提出。</span></li>
         <li class="flex items-start"><span class="text-blue-500 mr-3 flex-shrink-0 text-lg leading-none mt-0.5">•</span><span class="flex-1 leading-relaxed">逾時申請因食材已訂購，<span class="text-red-500 font-bold">無法退費</span>。</span></li>
@@ -194,14 +215,16 @@
         <p class="text-gray-600 font-medium">處理中...</p>
       </div>
     </div>
+    
     <div id="successModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div class="modal-content bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full">
         <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fa-solid fa-check"></i></div>
         <h3 class="text-2xl font-bold text-gray-900 mb-2">申請成功</h3>
-        <p class="text-gray-500 mb-8">系統已收到資料，請留意退費通知。</p>
+        <p class="text-gray-500 mb-8">系統已收到您的資料，<br>請留意退費通知。</p>
         <button onclick="closeSuccessModal()" class="ios-btn-primary w-full py-3.5">完成</button>
       </div>
     </div>
+
     <div id="infoModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div class="modal-content bg-white p-6 rounded-2xl shadow-2xl text-center max-w-xs w-full">
         <div class="mb-3 text-yellow-500 text-4xl"><i class="fa-solid fa-circle-exclamation"></i></div>
@@ -291,7 +314,7 @@
         document.getElementById('calendar-hint').classList.replace('text-red-500', 'text-gray-400');
         
         calculateDeadlineRule();
-        renderCalendar(); // 立即重繪
+        renderCalendar(); 
         
         if (shouldRefresh) fetchHolidays();
     }
@@ -299,124 +322,30 @@
     function saveAdminHolidays() {
         if (!confirm("確定要儲存這些不供餐日設定嗎？")) return;
         const newHolidays = Array.from(adminHolidaySet).sort();
-        document.getElementById('loadingOverlay').classList.remove('hidden');
+        // 1. 立即樂觀更新本地變數，確保畫面即時反應
+        HOLIDAYS = newHolidays; 
         
+        // 2. 移除已選日期中被設為假日的日期
+        newHolidays.forEach(date => {
+            if (selectedDatesSet.has(date)) selectedDatesSet.delete(date);
+        });
+        updateSummary();
+        
+        // 3. 退出管理員模式 (介面立刻變回一般模式，且套用新假日)
+        exitAdminMode(false); 
+
+        // 4. 背景送出資料
         safeFetch({ action: 'updateHolidays', holidays: newHolidays, password: adminPassword })
         .then(data => {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            if (data.result === 'success') {
-                alert("設定已儲存！");
-                // 1. 立即更新記憶體中的 HOLIDAYS
-                HOLIDAYS = newHolidays; 
-                // 2. 如果原本有選取這些日期，要自動取消選取
-                newHolidays.forEach(date => {
-                    if (selectedDatesSet.has(date)) selectedDatesSet.delete(date);
-                });
-                updateSummary();
-                // 3. 退出管理員模式 (不需重新 fetch)
-                exitAdminMode(false); 
-            } else { alert("儲存失敗：" + data.error); }
+            if (data.result !== 'success') {
+                alert("背景儲存失敗，請重新整理頁面檢查：" + data.error);
+            }
         })
-        .catch(err => { document.getElementById('loadingOverlay').classList.add('hidden'); alert(err.message); });
+        .catch(err => { 
+            alert("背景儲存連線錯誤：" + err.message); 
+        });
     }
 
-    // Calendar Rendering - Clean Logic
-    function renderMonth(year, month) {
-      const wrapper = document.getElementById('calendar-wrapper');
-      const monthContainer = document.createElement('div');
-      const displayDate = new Date(year, month, 1);
-      const rocYear = displayDate.getFullYear() - 1911;
-      
-      const title = document.createElement('div');
-      title.className = "text-center font-bold text-gray-800 mb-3 text-base";
-      title.innerText = `民國${rocYear}年 ${displayDate.getMonth() + 1}月`;
-      monthContainer.appendChild(title);
-      
-      const weekHeader = document.createElement('div');
-      weekHeader.className = "grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider";
-      ['日','一','二','三','四','五','六'].forEach(d => { const s = document.createElement('span'); s.innerText = d; weekHeader.appendChild(s); });
-      monthContainer.appendChild(weekHeader);
-      
-      const grid = document.createElement('div');
-      grid.className = "grid grid-cols-7 gap-1 sm:gap-2";
-      
-      const firstDay = new Date(year, month, 1);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const startDayOfWeek = firstDay.getDay(); 
-      const today = new Date();
-      
-      for (let i = 0; i < startDayOfWeek; i++) grid.appendChild(document.createElement('div'));
-      
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dateObj = new Date(year, month, d);
-        const dateStr = formatDateKey(dateObj); 
-        const btn = document.createElement('button');
-        btn.type = "button"; btn.innerText = d;
-        btn.className = "calendar-day h-10 w-full flex items-center justify-center text-sm transition-transform active:scale-90";
-        
-        // Reset style explicitly
-        btn.style.color = '';
-        btn.style.backgroundColor = '';
-
-        const dayOfWeek = dateObj.getDay();
-        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-        
-        // 狀態判斷
-        let isHoliday = isAdminMode ? adminHolidaySet.has(dateStr) : HOLIDAYS.includes(dateStr);
-        const isMakeup = MAKEUP_DAYS.includes(dateStr); 
-        const isToday = (dateObj.toDateString() === today.toDateString());
-
-        if (isToday) btn.classList.add('today');
-
-        // 管理員模式：直接渲染紅色
-        if (isAdminMode) {
-            if (isHoliday) btn.classList.add('is-holiday-setting');
-            else if (isWeekend) btn.classList.add('holiday-text'); // 週末紅字
-            
-            btn.onclick = () => {
-                if (adminHolidaySet.has(dateStr)) adminHolidaySet.delete(dateStr); else adminHolidaySet.add(dateStr);
-                renderCalendar();
-            };
-        } 
-        // 一般模式
-        else {
-            const compareDate = new Date(dateObj); compareDate.setHours(0,0,0,0);
-            const thresholdDate = new Date(earliestValidDateObj); thresholdDate.setHours(0,0,0,0);
-            
-            let isDisabled = false;
-            let disableReason = "";
-
-            if (compareDate < thresholdDate) { 
-                isDisabled = true; 
-                disableReason = `已超過申請期限\n(需於 ${formatDateSimple(earliestValidDateObj)} (含)以後才可退費)`; 
-            }
-            else if (isHoliday) { 
-                isDisabled = true; 
-                disableReason = "非供餐日 (學校設定)"; 
-                btn.classList.add('holiday-text'); // 雖然禁用但保留紅字提示
-            }
-            else if (!isMakeup && isWeekend) { 
-                isDisabled = true; 
-                disableReason = "非供餐日 (週末)";
-                btn.classList.add('holiday-text'); 
-            }
-            
-            if (isMakeup) btn.classList.add('makeup-day');
-
-            if (isDisabled) {
-                btn.classList.add('is-disabled');
-                btn.onclick = () => showInfoModal(`無法選擇 ${dateStr}`, `原因：${disableReason}`);
-            } else {
-                btn.onclick = () => toggleDateSelection(dateStr, btn);
-                if (selectedDatesSet.has(dateStr)) btn.classList.add('selected');
-            }
-        }
-        grid.appendChild(btn);
-      }
-      monthContainer.appendChild(grid); wrapper.appendChild(monthContainer);
-    }
-
-    // ... (其餘共用函式保持不變) ...
     function handleFormSubmit(e) {
       e.preventDefault();
       const form = document.getElementById('refundForm');
@@ -514,6 +443,111 @@
     }
     function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
     function onFailure(e) { document.getElementById('loadingOverlay').classList.add('hidden'); alert(e.message); }
+
+    // Calendar Rendering - Clean Logic
+    function renderMonth(year, month) {
+      const wrapper = document.getElementById('calendar-wrapper');
+      const monthContainer = document.createElement('div');
+      const displayDate = new Date(year, month, 1);
+      const rocYear = displayDate.getFullYear() - 1911;
+      
+      const title = document.createElement('div');
+      title.className = "text-center font-bold text-gray-800 mb-3 text-base";
+      title.innerText = `民國${rocYear}年 ${displayDate.getMonth() + 1}月`;
+      monthContainer.appendChild(title);
+      
+      const weekHeader = document.createElement('div');
+      weekHeader.className = "grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider";
+      ['日','一','二','三','四','五','六'].forEach(d => { const s = document.createElement('span'); s.innerText = d; weekHeader.appendChild(s); });
+      monthContainer.appendChild(weekHeader);
+      
+      const grid = document.createElement('div');
+      grid.className = "grid grid-cols-7 gap-1 sm:gap-2";
+      
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const startDayOfWeek = firstDay.getDay(); 
+      const today = new Date();
+      
+      for (let i = 0; i < startDayOfWeek; i++) grid.appendChild(document.createElement('div'));
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateObj = new Date(year, month, d);
+        const dateStr = formatDateKey(dateObj); 
+        const btn = document.createElement('button');
+        btn.type = "button"; btn.innerText = d;
+        btn.className = "calendar-day h-10 w-full flex items-center justify-center text-sm transition-transform active:scale-90";
+        
+        // Reset style explicitly
+        btn.style.color = '';
+        btn.style.backgroundColor = '';
+
+        const dayOfWeek = dateObj.getDay();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        
+        // 狀態判斷
+        let isHoliday = isAdminMode ? adminHolidaySet.has(dateStr) : HOLIDAYS.includes(dateStr);
+        const isMakeup = MAKEUP_DAYS.includes(dateStr); 
+        const isToday = (dateObj.toDateString() === today.toDateString());
+
+        if (isToday) btn.classList.add('today');
+
+        // 管理員模式：直接渲染紅色
+        if (isAdminMode) {
+            if (isHoliday) btn.classList.add('is-holiday-setting');
+            else if (isWeekend) btn.classList.add('holiday-text'); // 週末紅字
+            
+            btn.onclick = () => {
+                if (adminHolidaySet.has(dateStr)) adminHolidaySet.delete(dateStr); else adminHolidaySet.add(dateStr);
+                renderCalendar();
+            };
+        } 
+        // 一般模式
+        else {
+            const compareDate = new Date(dateObj); compareDate.setHours(0,0,0,0);
+            const thresholdDate = new Date(earliestValidDateObj); thresholdDate.setHours(0,0,0,0);
+            
+            let isDisabled = false;
+            let disableReason = "";
+
+            // 如果日期比「最早可退日」還早，一律禁用 (除非它是將來的日子但被設為不供餐)
+            // 修正：先檢查是否過期，再檢查是否為假日
+            // 注意：compareDate < thresholdDate 表示 "早於" 截止日
+            
+            // 1. 檢查是否為已過期的日子 (不可選)
+            if (compareDate < thresholdDate) { 
+                isDisabled = true; 
+                disableReason = `已超過申請期限\n(需於 ${formatDateSimple(earliestValidDateObj)} (含)以後才可退費)`; 
+            }
+            
+            // 2. 檢查是否為「不供餐日」 (無論是否過期，只要是不供餐日都顯示為紅色並禁用)
+            // 為了讓使用者知道那天是不供餐，即便它在未來，也要顯示紅色
+            if (isHoliday) { 
+                isDisabled = true; 
+                disableReason = "非供餐日 (學校設定)"; 
+                btn.classList.add('holiday-locked'); // 使用新樣式：強制紅色+刪除線
+            }
+            // 3. 檢查是否為週末 (且非補班日)
+            else if (!isMakeup && isWeekend) { 
+                isDisabled = true; 
+                disableReason = "非供餐日 (週末)";
+                btn.classList.add('holiday-text'); 
+            }
+            
+            if (isMakeup) btn.classList.add('makeup-day');
+
+            if (isDisabled) {
+                btn.classList.add('is-disabled');
+                btn.onclick = () => showInfoModal(`無法選擇 ${dateStr}`, `原因：${disableReason}`);
+            } else {
+                btn.onclick = () => toggleDateSelection(dateStr, btn);
+                if (selectedDatesSet.has(dateStr)) btn.classList.add('selected');
+            }
+        }
+        grid.appendChild(btn);
+      }
+      monthContainer.appendChild(grid); wrapper.appendChild(monthContainer);
+    }
   </script>
 </body>
 </html>
