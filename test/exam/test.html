@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owen's English Quiz: The "Did" Trap</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        /* Quiz Section */
+        #quiz-container {
+            display: block;
+        }
+
+        .question-card {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 500px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Result Section */
+        #result-container {
+            display: none;
+        }
+
+        .score-card {
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .feedback-item {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ddd;
+        }
+
+        .feedback-item.correct {
+            border-left-color: var(--success-color);
+        }
+
+        .feedback-item.wrong {
+            border-left-color: var(--error-color);
+            background-color: #fff5f5;
+        }
+
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #555;
+            background: rgba(0,0,0,0.03);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .status-correct { background-color: var(--success-color); }
+        .status-wrong { background-color: var(--error-color); }
+
+        /* Navigation Buttons */
+        .btn-submit {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            display: block;
+        }
+
+        .btn-submit:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-retry {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-header">
+        <h1>Owen's English Quiz 📝</h1>
+        <div class="subtitle">Focus: Past Tense Questions (Did + V)</div>
+    </div>
+
+    <div id="quiz-container">
+        <div id="questions-list"></div>
+        <button class="btn-submit" onclick="submitQuiz()">交卷看分數 (Submit)</button>
+    </div>
+
+    <div id="result-container">
+        <div class="score-card">
+            <div>你的得分 Score</div>
+            <div class="score-number" id="score-display">0</div>
+            <div id="score-message"></div>
+        </div>
+        
+        <h3>詳細解析 Review:</h3>
+        <div id="feedback-list"></div>
+        
+        <button class="btn-retry" onclick="location.reload()">再測一次 (Try Again)</button>
+    </div>
+</div>
+
+<script>
+    // 題庫資料
+    const questions = [
+        { q: "Did you _____ TV last night?", options: ["watch", "watched", "watches", "watching"], ans: 0, reason: "有 Did 出現，動詞要變回原形 watch。" },
+        { q: "What did she _____ for lunch?", options: ["eat", "ate", "eats", "eating"], ans: 0, reason: "問句有 Did，所以不能用過去式 ate，要用原形 eat。" },
+        { q: "Did they _____ to the park?", options: ["go", "went", "goes", "going"], ans: 0, reason: "Did 出現了，went 必須還原成 go。" },
+        { q: "Where did he _____ his homework?", options: ["do", "did", "does", "done"], ans: 0, reason: "助動詞是 Did，本動詞要用原形 do。" },
+        { q: "Did Mom _____ a cake?", options: ["make", "made", "makes", "making"], ans: 0, reason: "Did + 原形動詞 make。" },
+        { q: "Did the dog _____ at you?", options: ["bark", "barked", "barks", "barking"], ans: 0, reason: "有 Did 就不能加 ed，選 bark。" },
+        { q: "When did the movie _____?", options: ["start", "started", "starts", "starting"], ans: 0, reason: "Did 後面接原形 start。" },
+        { q: "Did Owen _____ his room?", options: ["clean", "cleaned", "cleans", "cleaning"], ans: 0, reason: "Did + 原形動詞 clean。" },
+        { q: "Who did you _____ at the party?", options: ["see", "saw", "seen", "sees"], ans: 0, reason: "Saw 是過去式，有 Did 時要改回 See。" },
+        { q: "Did it _____ yesterday?", options: ["rain", "rained", "rains", "raining"], ans: 0, reason: "有 Did，下雨 rain 不用加 ed。" },
+        { q: "What did you _____ in the box?", options: ["put", "puts", "putting", "putted"], ans: 0, reason: "Put 的原形就是 put。" },
+        { q: "Did she _____ happy?", options: ["look", "looked", "looks", "looking"], ans: 0, reason: "Look (看起來) 用原形。" },
+        { q: "Why did the baby _____?", options: ["cry", "cried", "cries", "crying"], ans: 0, reason: "Cry 是原形。" },
+        { q: "Did your brother _____ basketball?", options: ["play", "played", "plays", "playing"], ans: 0, reason: "玩 (play) 不要加 ed。" },
+        { q: "What time did you _____ up?", options: ["get", "got", "gets", "getting"], ans: 0, reason: "Get up 是原形。" },
+        { q: "Did we _____ the game?", options: ["win", "won", "wins", "winning"], ans: 0, reason: "Win 是原形，Won 是過去式不能用。" },
+        { q: "Did the teacher _____ English?", options: ["teach", "taught", "teaches", "teaching"], ans: 0, reason: "Teach 是原形。" },
+        { q: "Where did you _____ that bag?", options: ["buy", "bought", "buys", "buying"], ans: 0, reason: "Buy 是原形，Bought 是過去式。" },
+        { q: "Did he _____ the answer?", options: ["know", "knew", "knows", "knowing"], ans: 0, reason: "Know 是原形。" },
+        { q: "Did you _____ a letter?", options: ["write", "wrote", "writes", "written"], ans: 0, reason: "Write 是原形。" }
+    ];
+
+    let userAnswers = new Array(questions.length).fill(null);
+
+    // 初始化測驗
+    function initQuiz() {
+        const list = document.getElementById('questions-list');
+        questions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, optIndex) => {
+                optionsHtml += `<div class="option-btn" onclick="selectOption(${index}, ${optIndex}, this)">${opt}</div>`;
+            });
+
+            card.innerHTML = `
+                <span class="question-number">Question ${index + 1} / ${questions.length}</span>
+                <div class="question-text">${q.q}</div>
+                <div class="options-grid" id="options-${index}">
+                    ${optionsHtml}
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    // 選擇答案
+    window.selectOption = function(qIndex, optIndex, element) {
+        // 記錄答案
+        userAnswers[qIndex] = optIndex;
+
+        // 視覺回饋
+        const parent = document.getElementById(`options-${qIndex}`);
+        const buttons = parent.getElementsByClassName('option-btn');
+        
+        // 移除其他按鈕的 selected 樣式
+        for (let btn of buttons) {
+            btn.classList.remove('selected');
+        }
+        
+        // 加上當前按鈕的 selected 樣式
+        element.classList.add('selected');
+    }
+
+    // 交卷並計算分數
+    window.submitQuiz = function() {
+        // 檢查是否每題都寫了 (選擇性，這裡不強制，沒寫算錯)
+        let score = 0;
+        let correctCount = 0;
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = ''; // 清空舊資料
+
+        questions.forEach((q, index) => {
+            const isCorrect = userAnswers[index] === q.ans;
+            if (isCorrect) correctCount++;
+
+            // 產生詳細解析 HTML
+            const userChoiceText = userAnswers[index] !== null ? q.options[userAnswers[index]] : "未作答 (No Answer)";
+            const correctText = q.options[q.ans];
+            const statusClass = isCorrect ? 'correct' : 'wrong';
+            const badgeHtml = isCorrect 
+                ? '<span class="status-badge status-correct">Correct! 答對了</span>' 
+                : '<span class="status-badge status-wrong">Wrong 答錯了</span>';
+
+            const item = document.createElement('div');
+            item.className = `feedback-item ${statusClass}`;
+            item.innerHTML = `
+                ${badgeHtml}
+                <div style="font-weight:bold; margin-bottom:5px;">Q${index+1}: ${q.q}</div>
+                <div>你的答案: <span style="color:${isCorrect?'green':'red'}">${userChoiceText}</span></div>
+                ${!isCorrect ? `<div>正確答案: <span style="font-weight:bold; color:green">${correctText}</span></div>` : ''}
+                <div class="explanation">💡 解析: ${q.reason}</div>
+            `;
+            feedbackList.appendChild(item);
+        });
+
+        score = Math.round((correctCount / questions.length) * 100);
+
+        // 顯示結果頁面
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('quiz-header').style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+        
+        const scoreDisplay = document.getElementById('score-display');
+        scoreDisplay.innerText = score;
+        
+        const scoreMessage = document.getElementById('score-message');
+        if(score === 100) {
+            scoreMessage.innerText = "太厲害了！全對！Owen 你完全懂了！🎉";
+            scoreMessage.style.color = "#2ecc71";
+        } else if (score >= 80) {
+            scoreMessage.innerText = "很棒！觀念已經很清楚了，只差一點點！💪";
+        } else {
+            scoreMessage.innerText = "再試一次！記得口訣：有 Did 就要用原形動詞！🔥";
+        }
+
+        // 捲動到頂部
+        window.scrollTo(0,0);
+    }
+
+    // 啟動
+    initQuiz();
+</script>
+
+</body>
+</html>
