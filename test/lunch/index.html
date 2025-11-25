@@ -244,7 +244,7 @@
     const MAKEUP_DAYS = ["2025/2/8"];
     const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","週五籃球班B","週五籃球班C","其他"];
 
-    // 修正：更新預設不供餐日清單
+    // 修正：更新預設不供餐日清單，包含 2026/1/1
     let HOLIDAYS = ["2026/1/1", "2026/4/27", "2026/4/3", "2026/5/1", "2026/6/19"]; 
     
     let earliestValidDateObj = null;
@@ -321,22 +321,24 @@
         if (shouldRefresh) fetchHolidays();
     }
 
-    // --- 關鍵修正：先儲存密碼到 local variable，再傳給後端 ---
     function saveAdminHolidays() {
         if (!confirm("確定要儲存這些不供餐日設定嗎？")) return;
-        
         const newHolidays = Array.from(adminHolidaySet).sort();
-        const currentPwd = adminPassword; // 🔴 先暫存密碼，避免 exitAdminMode 清空它
+        
+        // 暫存密碼，避免 exitAdminMode 清空
+        const currentPwd = adminPassword; 
 
         document.getElementById('loadingOverlay').classList.remove('hidden');
         
-        // 1. 樂觀更新：立即更新前端顯示
+        // 1. 立即更新本地
         HOLIDAYS = newHolidays; 
         newHolidays.forEach(date => { if (selectedDatesSet.has(date)) selectedDatesSet.delete(date); });
         updateSummary();
-        exitAdminMode(false); // 退出模式 (會清空 adminPassword)
+        
+        // 2. 退出管理員模式 (不需等待後端)
+        exitAdminMode(false); 
 
-        // 2. 背景傳送 (使用暫存的 currentPwd)
+        // 3. 背景傳送
         safeFetch({ action: 'updateHolidays', holidays: newHolidays, password: currentPwd })
         .then(data => { 
             document.getElementById('loadingOverlay').classList.add('hidden');
