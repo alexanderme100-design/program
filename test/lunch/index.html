@@ -40,16 +40,16 @@
     /* Calendar Styling */
     .calendar-day { border-radius: 50%; font-weight: 500; position: relative; transition: all 0.1s; }
     
-    /* 選中狀態 */
+    /* 選中狀態 (藍底白字) */
     .calendar-day.selected { background-color: #007AFF !important; color: white !important; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); }
     
-    /* 今天 */
+    /* 今天 (小藍點) */
     .calendar-day.today { font-weight: 700; color: #007AFF; }
     .calendar-day.today::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #007AFF; border-radius: 50%; }
     .calendar-day.today.selected { color: white; }
     .calendar-day.today.selected::after { background-color: white; }
 
-    /* 禁用狀態 (優先權高) */
+    /* 禁用狀態 (優先權最高，強制覆蓋其他顏色) */
     .calendar-day.is-disabled { 
         color: #D1D5DB !important; /* 淺灰色 */
         text-decoration: line-through; 
@@ -59,9 +59,9 @@
         border: 1px solid transparent;
     }
     
-    /* 不供餐日鎖定 (優先權最高 - 強制紅色) */
+    /* 特殊：被設定為假日的不供餐日 (即使過期也要顯示紅色，但不可選) */
     .calendar-day.holiday-locked { 
-        color: #FF3B30 !important; 
+        color: #FF3B30 !important; /* 強制紅色 */
         text-decoration: line-through;
         opacity: 0.6;
         cursor: not-allowed !important;
@@ -73,7 +73,7 @@
     /* 補班日 (黃底) */
     .calendar-day.makeup-day { background-color: #FEF3C7; color: #D97706; }
 
-    /* 管理員模式 */
+    /* 管理員模式：設定中的假日 */
     .admin-mode .calendar-day { cursor: pointer !important; opacity: 1 !important; text-decoration: none !important; }
     .admin-mode .calendar-day.is-holiday-setting { 
         background-color: #FF3B30 !important; 
@@ -103,14 +103,18 @@
   </div>
 
   <div class="max-w-2xl mx-auto my-6 px-3 sm:px-6 pt-4">
+    <!-- Header -->
     <div class="mb-6 text-center sm:text-left">
       <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center justify-center sm:justify-start">
-        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md"><i class="fa-solid fa-utensils text-lg"></i></div>
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md">
+           <i class="fa-solid fa-utensils text-lg"></i>
+        </div>
         午餐停餐/退費申請
       </h1>
       <p class="text-gray-500 mt-1 ml-1 font-medium">每餐退費標準 $60</p>
     </div>
 
+    <!-- 規則 -->
     <div class="ios-card p-4 sm:p-5 mb-6 bg-blue-50/50 border-blue-100">
       <h3 class="font-bold text-blue-600 mb-3 flex items-center text-sm uppercase tracking-wide">
         <i class="fa-solid fa-circle-info mr-2"></i> 申請規則與須知
@@ -233,16 +237,15 @@
   </div>
 
   <script>
-    // --- ⚠️ 重要：請務必填入部署後的 Web App 網址 ⚠️ ---
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw-NTEEZzXEDGUh4msIvqozet-uegXdH86CeLOEjraL8CeV2gMxJjJse3UZTzz-9dmvhw/exec"; 
+    // --- ⚠️ 請確認填入正確的 API 網址 ⚠️ ---
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx70U4IS-vBqBUj3FUq46NjHhz4-rwtvFKD9RSqXeeQ1sMp0_R3Sm2GpR0HBZwb80lkmg/exec"; 
 
     const COST_PER_MEAL = 60;
     const MAKEUP_DAYS = ["2025/2/8"];
     const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","週五籃球班B","週五籃球班C","其他"];
 
-    // 修正：預設加入 2026/1/1 為不供餐日
-    // 若後端已有資料，這裡會被後端資料覆蓋；若後端為空，進入管理員模式儲存後即可寫入後端。
-    let HOLIDAYS = ["2026/1/1"]; 
+    // 預設不供餐日
+    let HOLIDAYS = ["2026/1/1", "2026/4/27"]; 
     let earliestValidDateObj = null;
     let earliestValidDateStr = "";
     let selectedDatesSet = new Set();
