@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owen's English Quiz: Level 3 (Senior High)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 沉穩深藍，代表高中學術等級 */
+            --accent-color: #e67e22;  /* 亮橘色點綴 */
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #34495e;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            border-top: 6px solid var(--accent-color);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .level-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: #fff;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .question-meta {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+            color: #555;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f4f6f7;
+            color: #000;
+        }
+
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Results */
+        #result-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-box {
+            background: var(--primary-color);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .feedback-item {
+            border: 1px solid #ecf0f1;
+            background: #fdfdfd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #bdc3c7;
+        }
+
+        .feedback-item.correct { border-left-color: var(--success-color); }
+        .feedback-item.wrong { border-left-color: var(--error-color); }
+
+        .explanation-box {
+            margin-top: 15px;
+            background-color: #f0f3f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .keyword {
+            color: var(--error-color);
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.3s;
+        }
+
+        .btn-submit { background-color: var(--accent-color); color: white; }
+        .btn-submit:hover { background-color: #d35400; }
+
+        .btn-retry { background-color: var(--primary-color); color: white; }
+        .btn-retry:hover { background-color: #34495e; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-header" class="header-section">
+        <h1>Owen's English Challenge</h1>
+        <div class="level-badge">Level 3: Senior High Advanced</div>
+        <p style="margin-top: 15px; color: #7f8c8d;">
+            包含：過去完成式、假設語氣、特殊句型與時態比較。<br>
+            (Includes Past Perfect, Subjunctive, and Complex Verb Forms)
+        </p>
+    </div>
+
+    <div id="quiz-container">
+        <div id="questions-list"></div>
+        <button class="btn-action btn-submit" onclick="submitQuiz()">Submit Final Answers</button>
+    </div>
+
+    <div id="result-container">
+        <div class="score-box">
+            <span>SCORE</span>
+            <span class="score-value" id="score-display">0</span>
+            <span id="score-comment"></span>
+        </div>
+        
+        <h3>Performance Analysis</h3>
+        <div id="feedback-list"></div>
+        
+        <button class="btn-action btn-retry" onclick="location.reload()">Retry Assessment</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            category: "Past Perfect vs. Simple Past",
+            q: "By the time Mom got home, I _____ already _____ my homework.",
+            options: ["did / finish", "had / finished", "have / finished", "was / finishing"],
+            ans: 1,
+            reason: "【過去完成式】當過去有兩個動作發生，『先發生的』用過去完成式 (had + p.p.)，『後發生的』用過去簡單式。做完功課(先) -> 媽媽回家(後)。"
+        },
+        {
+            category: "Subjunctive Mood (Past)",
+            q: "I wish I _____ harder for the test yesterday.",
+            options: ["studied", "have studied", "had studied", "would study"],
+            ans: 2,
+            reason: "【與過去事實相反的假設】昨天沒唸書，現在希望當時『有唸』。句型：I wish + 主詞 + had + p.p.。"
+        },
+        {
+            category: "Used to vs. Be used to",
+            q: "Owen is used to _____ English every day now.",
+            options: ["speak", "speaking", "spoke", "spoken"],
+            ans: 1,
+            reason: "【易混淆片語】be used to + V-ing 表示『現在習慣於...』。這裡的 to 是介系詞，後接動名詞。比較：used to + V (過去常常)。"
+        },
+        {
+            category: "Causative Verbs",
+            q: "The teacher had the students _____ the classroom yesterday.",
+            options: ["clean", "cleaned", "cleaning", "to clean"],
+            ans: 0,
+            reason: "【使役動詞】Have/Make/Let + 受詞 + 原形動詞 (VR)。雖然時間是 yesterday，但 had 已經變過去式了，受詞後的動作要用原形。"
+        },
+        {
+            category: "Modal Verbs + Perfect",
+            q: "You _____ me the truth! Why did you lie?",
+            options: ["should tell", "should told", "should have told", "had told"],
+            ans: 2,
+            reason: "【過去的責備/遺憾】Should have + p.p. 表示『當時應該做（卻沒做）』。"
+        },
+        {
+            category: "Past Sense Verbs",
+            q: "I saw him _____ the room quietly five minutes ago.",
+            options: ["enter", "entered", "to enter", "enters"],
+            ans: 0,
+            reason: "【感官動詞】See/Hear/Watch + 受詞 + 原形動詞 (強調事實/過程) 或 V-ing (強調正在進行)。絕對不能加 ed 或 to。"
+        },
+        {
+            category: "Since + Past Simple",
+            q: "I haven't seen him since he _____ to Taipei.",
+            options: ["moves", "moved", "has moved", "had moved"],
+            ans: 1,
+            reason: "【完成式時間軸】Since (自從) 接的時間點必須是『過去式』。句子結構：現在完成式 + since + 過去簡單式。"
+        },
+        {
+            category: "Passive Voice in Past",
+            q: "The window _____ by the boy last night.",
+            options: ["broke", "was broken", "had broken", "broken"],
+            ans: 1,
+            reason: "【過去被動語態】主詞是窗戶(物)，被打破。公式：Was/Were + p.p. (broken)。"
+        },
+        {
+            category: "Indirect Speech",
+            q: "She asked me if I _____ the movie before.",
+            options: ["see", "saw", "have seen", "had seen"],
+            ans: 3,
+            reason: "【間接問句時態退位】她『問(asked)』是過去式，而我看電影是在問『之前』，所以要退位成『過去完成式 (had seen)』。"
+        },
+        {
+            category: "Emphatic Do",
+            q: "I didn't buy the shoes, but I _____ _____ the hat.",
+            options: ["did / buy", "did / bought", "had / bought", "was / buying"],
+            ans: 0,
+            reason: "【強調語氣】在肯定句中加入 Did 表示強調『真的做了』。結構同助動詞：Did + 原形 (buy)。"
+        }
+    ];
+
+    let userAnswers = new Array(questions.length).fill(null);
+
+    function initQuiz() {
+        const list = document.getElementById('questions-list');
+        questions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, optIndex) => {
+                optionsHtml += `<div class="option-btn" onclick="selectOption(${index}, ${optIndex}, this)">${opt}</div>`;
+            });
+
+            card.innerHTML = `
+                <span class="question-meta">Q${index + 1} • ${q.category}</span>
+                <div class="question-text">${q.q}</div>
+                <div class="options-grid" id="options-${index}">
+                    ${optionsHtml}
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    window.selectOption = function(qIndex, optIndex, element) {
+        userAnswers[qIndex] = optIndex;
+        const parent = document.getElementById(`options-${qIndex}`);
+        const buttons = parent.getElementsByClassName('option-btn');
+        for (let btn of buttons) { btn.classList.remove('selected'); }
+        element.classList.add('selected');
+    }
+
+    window.submitQuiz = function() {
+        if(userAnswers.includes(null)){
+            if(!confirm("Warning: You have unanswered questions. Submit anyway?")) return;
+        }
+
+        let correctCount = 0;
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = '';
+
+        questions.forEach((q, index) => {
+            const isCorrect = userAnswers[index] === q.ans;
+            if (isCorrect) correctCount++;
+
+            const userText = userAnswers[index] !== null ? q.options[userAnswers[index]] : "Skipped";
+            const correctText = q.options[q.ans];
+            const statusClass = isCorrect ? 'correct' : 'wrong';
+
+            const item = document.createElement('div');
+            item.className = `feedback-item ${statusClass}`;
+            item.innerHTML = `
+                <div style="font-weight:bold; color: #7f8c8d; margin-bottom:5px;">${q.category}</div>
+                <div style="font-size:1.1rem; margin-bottom:10px; font-weight:600;">${q.q}</div>
+                <div>Your Answer: <span style="color:${isCorrect? 'var(--success-color)' : 'var(--error-color)'}; font-weight:bold;">${userText}</span></div>
+                ${!isCorrect ? `<div>Correct Answer: <span style="color:var(--success-color); font-weight:bold;">${correctText}</span></div>` : ''}
+                <div class="explanation-box">👨‍🏫 <b>Teacher's Note:</b><br>${q.reason}</div>
+            `;
+            feedbackList.appendChild(item);
+        });
+
+        const score = Math.round((correctCount / questions.length) * 100);
+        
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('quiz-header').style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+        
+        const scoreDisplay = document.getElementById('score-display');
+        scoreDisplay.innerText = score;
+
+        const comment = document.getElementById('score-comment');
+        if(score === 100) comment.innerText = "Outstanding! High School Level Mastered! 🎓";
+        else if (score >= 80) comment.innerText = "Excellent Work! You understand advanced grammar. 🌟";
+        else if (score >= 60) comment.innerText = "Good Start! Review the explanations for tricky tenses. 📚";
+        else comment.innerText = "Keep Practice! These are hard concepts. Don't give up! 💪";
+
+        window.scrollTo(0,0);
+    }
+
+    initQuiz();
+</script>
+
+</body>
+</html>
