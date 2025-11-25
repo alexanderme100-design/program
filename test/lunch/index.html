@@ -24,7 +24,7 @@
     /* iOS Card & Inputs */
     .ios-card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03); }
     .ios-input { background: #F2F2F7; border: 1px solid transparent; border-radius: 10px; transition: all 0.2s; }
-    .ios-input:focus { background: white; border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); outline: none; }
+    .ios-input.focus { background: white; border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); outline: none; }
     .ios-input.error { background: #FFF2F2; border-color: #FF3B30; }
     .ios-btn-primary { background: #007AFF; color: white; border-radius: 12px; font-weight: 600; transition: all 0.2s; }
     .ios-btn-primary:active { transform: scale(0.98); opacity: 0.8; }
@@ -39,11 +39,7 @@
 
     /* Calendar Styling */
     .calendar-day { border-radius: 50%; font-weight: 500; position: relative; transition: all 0.1s; }
-    
-    /* 選中狀態 (藍底白字) */
     .calendar-day.selected { background-color: #007AFF !important; color: white !important; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); }
-    
-    /* 今天 (小藍點) */
     .calendar-day.today { font-weight: 700; color: #007AFF; }
     .calendar-day.today::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #007AFF; border-radius: 50%; }
     .calendar-day.today.selected { color: white; }
@@ -51,7 +47,7 @@
 
     /* 禁用狀態 (優先權最高，強制覆蓋其他顏色) */
     .calendar-day.is-disabled { 
-        color: #D1D5DB !important; /* 淺灰色 */
+        color: #D1D5DB !important; 
         text-decoration: line-through; 
         opacity: 0.7; 
         cursor: not-allowed !important; 
@@ -73,7 +69,7 @@
     /* 補班日 (黃底) */
     .calendar-day.makeup-day { background-color: #FEF3C7; color: #D97706; }
 
-    /* 管理員模式：設定中的假日 */
+    /* 管理員模式 */
     .admin-mode .calendar-day { cursor: pointer !important; opacity: 1 !important; text-decoration: none !important; }
     .admin-mode .calendar-day.is-holiday-setting { 
         background-color: #FF3B30 !important; 
@@ -238,15 +234,18 @@
 
   <script>
     // --- ⚠️ 請確認填入正確的 API 網址 ⚠️ ---
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx70U4IS-vBqBUj3FUq46NjHhz4-rwtvFKD9RSqXeeQ1sMp0_R3Sm2GpR0HBZwb80lkmg/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx70U4IS-vBqBUj3FUq46NjHhz4-rwtvFKD9RSqXeeQ1sMp0_R3Sm2GpR0HBZwb80lkmg/exec"; 
 
     const COST_PER_MEAL = 60;
     const MAKEUP_DAYS = ["2025/2/8"];
     const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","週五籃球班B","週五籃球班C","其他"];
 
-    // 修正：更新預設不供餐日清單，包含 2026/1/1
-    let HOLIDAYS = ["2026/1/1", "2026/4/27", "2026/4/3", "2026/5/1", "2026/6/19"]; 
+    // 預設不供餐日清單 (與管理員設定同步)
+    const DEFAULT_HOLIDAYS = ["2026/1/1", "2026/4/27", "2026/4/3", "2026/5/1", "2026/6/19"];
     
+    // 初始化 HOLIDAYS 為預設值，之後會被 fetchHolidays 覆蓋 (如果後端有資料)
+    let HOLIDAYS = [...DEFAULT_HOLIDAYS];
+
     let earliestValidDateObj = null;
     let earliestValidDateStr = "";
     let selectedDatesSet = new Set();
@@ -278,11 +277,21 @@
     function fetchHolidays() {
         safeFetch({ action: 'getHolidays' })
         .then(data => {
-            if (data.result === 'success' && Array.isArray(data.holidays)) HOLIDAYS = data.holidays;
+            if (data.result === 'success' && Array.isArray(data.holidays)) {
+                // 關鍵修正：如果後端回傳的陣列不為空，才覆蓋本地設定
+                // 這避免了第一次部署時，空資料庫把預設日期清空的問題
+                if (data.holidays.length > 0) {
+                    HOLIDAYS = data.holidays;
+                }
+            }
             calculateDeadlineRule();
             renderCalendar();
         })
-        .catch(err => { console.warn("載入設定失敗:", err.message); calculateDeadlineRule(); renderCalendar(); });
+        .catch(err => { 
+            console.warn("載入設定失敗 (使用預設值):", err.message); 
+            calculateDeadlineRule(); 
+            renderCalendar(); 
+        });
     }
 
     function toggleAdminMode() {
@@ -324,21 +333,15 @@
     function saveAdminHolidays() {
         if (!confirm("確定要儲存這些不供餐日設定嗎？")) return;
         const newHolidays = Array.from(adminHolidaySet).sort();
-        
-        // 暫存密碼，避免 exitAdminMode 清空
         const currentPwd = adminPassword; 
 
         document.getElementById('loadingOverlay').classList.remove('hidden');
         
-        // 1. 立即更新本地
         HOLIDAYS = newHolidays; 
         newHolidays.forEach(date => { if (selectedDatesSet.has(date)) selectedDatesSet.delete(date); });
         updateSummary();
-        
-        // 2. 退出管理員模式 (不需等待後端)
         exitAdminMode(false); 
 
-        // 3. 背景傳送
         safeFetch({ action: 'updateHolidays', holidays: newHolidays, password: currentPwd })
         .then(data => { 
             document.getElementById('loadingOverlay').classList.add('hidden');
@@ -423,19 +426,12 @@
     }
     function calculateDeadlineRule() { updateDashboard(); }
     
-    // --- 邏輯修正：不供餐日 (HOLIDAYS) 權重最高，直接判定為非工作日 ---
     function isWorkDay(date) {
       const dateStr = formatDateKey(date);
-      // 1. 先檢查是否為不供餐日 (即使是補班日或平日，只要不供餐就不算工作日)
       if (HOLIDAYS.includes(dateStr)) return false;
-      
-      // 2. 再檢查補班日 (如果不是不供餐日，且是補班日，則算工作日)
       if (MAKEUP_DAYS.includes(dateStr)) return true;
-      
-      // 3. 最後檢查週末
       const day = date.getDay();
       if (day === 0 || day === 6) return false;
-      
       return true;
     }
     
@@ -457,7 +453,6 @@
     function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
     function onFailure(e) { document.getElementById('loadingOverlay').classList.add('hidden'); alert(e.message); }
 
-    // Calendar Rendering
     function renderMonth(year, month) {
       const wrapper = document.getElementById('calendar-wrapper');
       const monthContainer = document.createElement('div');
@@ -491,21 +486,18 @@
         btn.type = "button"; btn.innerText = d;
         btn.className = "calendar-day h-10 w-full flex items-center justify-center text-sm transition-transform active:scale-90";
         
-        // Reset style explicitly
         btn.style.color = '';
         btn.style.backgroundColor = '';
 
         const dayOfWeek = dateObj.getDay();
         const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
         
-        // 狀態判斷
         let isHoliday = isAdminMode ? adminHolidaySet.has(dateStr) : HOLIDAYS.includes(dateStr);
         const isMakeup = MAKEUP_DAYS.includes(dateStr); 
         const isToday = (dateObj.toDateString() === today.toDateString());
 
         if (isToday) btn.classList.add('today');
 
-        // 管理員模式：直接渲染紅色
         if (isAdminMode) {
             if (isHoliday) btn.classList.add('is-holiday-setting');
             else if (isWeekend) btn.classList.add('holiday-text'); 
@@ -515,7 +507,6 @@
                 renderCalendar();
             };
         } 
-        // 一般模式
         else {
             const compareDate = new Date(dateObj); compareDate.setHours(0,0,0,0);
             const thresholdDate = new Date(earliestValidDateObj); thresholdDate.setHours(0,0,0,0);
