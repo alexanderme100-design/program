@@ -233,13 +233,16 @@
   </div>
 
   <script>
+    // --- ⚠️ 重要：請務必填入部署後的 Web App 網址 ⚠️ ---
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw-NTEEZzXEDGUh4msIvqozet-uegXdH86CeLOEjraL8CeV2gMxJjJse3UZTzz-9dmvhw/exec"; 
 
     const COST_PER_MEAL = 60;
     const MAKEUP_DAYS = ["2025/2/8"];
     const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","週五籃球班B","週五籃球班C","其他"];
 
-    let HOLIDAYS = []; 
+    // 修正：預設加入 2026/1/1 為不供餐日
+    // 若後端已有資料，這裡會被後端資料覆蓋；若後端為空，進入管理員模式儲存後即可寫入後端。
+    let HOLIDAYS = ["2026/1/1"]; 
     let earliestValidDateObj = null;
     let earliestValidDateStr = "";
     let selectedDatesSet = new Set();
