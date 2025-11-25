@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owen's English Quiz: Level 2 (Junior High)</title>
+    <style>
+        :root {
+            --primary-color: #5e35b1; /* 深紫色，代表進階 */
+            --success-color: #00b894;
+            --error-color: #d63031;
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #2d3436;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            border-top: 10px solid var(--primary-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .level-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 0 auto 20px auto;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        /* Quiz Section */
+        .question-card {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed #b2bec3;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            color: #2d3436;
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: #636e72;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 手機預設單欄 */
+            gap: 12px;
+        }
+
+        @media (min-width: 500px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr; /* 平板以上雙欄 */
+            }
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f3e5f5;
+        }
+
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(94, 53, 177, 0.3);
+        }
+
+        /* Result Section */
+        #result-container {
+            display: none;
+        }
+
+        .score-card {
+            text-align: center;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+        }
+
+        .score-number {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .feedback-item {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 6px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .feedback-item.correct { border-left-color: var(--success-color); }
+        .feedback-item.wrong { border-left-color: var(--error-color); }
+
+        .explanation {
+            margin-top: 12px;
+            font-size: 0.95rem;
+            color: #444;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .btn-submit, .btn-retry {
+            border: none;
+            padding: 18px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.1s;
+        }
+
+        .btn-submit {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        .btn-retry {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(94, 53, 177, 0.4);
+        }
+
+        .btn-submit:active, .btn-retry:active {
+            transform: scale(0.98);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-header" class="header-section">
+        <h1>Owen's Challenge</h1>
+        <div class="level-badge">Level 2: Junior High Prep</div>
+        <div style="color: #666;">進階挑戰：注意 Did vs. Was/Were 與否定句</div>
+    </div>
+
+    <div id="quiz-container">
+        <div id="questions-list"></div>
+        <button class="btn-submit" onclick="submitQuiz()">交卷 (Submit Answers)</button>
+    </div>
+
+    <div id="result-container">
+        <div class="score-card">
+            <div>Final Score</div>
+            <div class="score-number" id="score-display">0</div>
+            <div id="score-message"></div>
+        </div>
+        
+        <h3 style="color:var(--primary-color);">詳細解析 Review:</h3>
+        <div id="feedback-list"></div>
+        
+        <button class="btn-retry" onclick="location.reload()">不服輸，再試一次 (Try Again)</button>
+    </div>
+</div>
+
+<script>
+    // 進階題庫資料
+    const questions = [
+        { 
+            q: "Where _____ your sister _____ the dress yesterday?", 
+            options: ["did / buy", "did / bought", "was / buy", "does / buy"], 
+            ans: 0, 
+            reason: "【WH問句】過去式問句結構：Where + Did + 主詞 + 原形動詞。bought 是過去式，不能用。" 
+        },
+        { 
+            q: "I _____ _____ the answer to the question.", 
+            options: ["didn't knew", "didn't know", "wasn't know", "not know"], 
+            ans: 1, 
+            reason: "【否定句】過去式否定：didn't + 原形動詞。Knew 是過去式，必須改回 know。" 
+        },
+        { 
+            q: "_____ you busy last night?", 
+            options: ["Did", "Do", "Were", "Was"], 
+            ans: 2, 
+            reason: "【陷阱題】Busy (忙碌的) 是形容詞，沒有動作。這句沒有動詞，所以要用 Be動詞 (Were)，不能用助動詞 Did。" 
+        },
+        { 
+            q: "_____ you _____ to the doctor last week?", 
+            options: ["Were / go", "Did / went", "Did / go", "Was / go"], 
+            ans: 2, 
+            reason: "【一般動詞】這裡有動作 'go' (去)，所以必須用助動詞 Did 幫忙，後面接原形 go。" 
+        },
+        { 
+            q: "What time _____ the party _____?", 
+            options: ["did / started", "was / start", "did / start", "did / starts"], 
+            ans: 2, 
+            reason: "【WH問句】Did + 主詞 (the party) + 原形動詞 (start)。" 
+        },
+        { 
+            q: "_____ she _____ her homework before dinner?", 
+            options: ["Did / finish", "Did / finished", "Was / finish", "Does / finish"], 
+            ans: 0, 
+            reason: "【助動詞還原】Did 出現後，finished 要去掉 ed 變回原形。" 
+        },
+        { 
+            q: "Sorry, I _____ _____ you clearly.", 
+            options: ["don't hear", "didn't heard", "didn't hear", "wasn't hear"], 
+            ans: 2, 
+            reason: "【否定句】過去沒聽到：didn't + 原形 (hear)。heard 是過去式，不能放在 didn't 後面。" 
+        },
+        { 
+            q: "What _____ you _____ yesterday?", 
+            options: ["did / do", "did / did", "were / do", "do / did"], 
+            ans: 0, 
+            reason: "【雙重身分】第一個 did 是助動詞，第二個 do 是「做」的原形動詞。" 
+        },
+        { 
+            q: "_____ your parents _____ home late?", 
+            options: ["Did / come", "Did / came", "Were / come", "Do / came"], 
+            ans: 0, 
+            reason: "【複數主詞】不管主詞是單數還是複數，過去式助動詞一律用 Did，動詞一律用原形 come。" 
+        },
+        { 
+            q: "_____ Peter sick this morning?", 
+            options: ["Did", "Was", "Were", "Does"], 
+            ans: 1, 
+            reason: "【陷阱題】Sick (生病) 是形容詞。沒有動作，就要用 Be 動詞。Peter 是單數，所以用 Was。" 
+        },
+        { 
+            q: "Did everyone in the class _____ the test?", 
+            options: ["passed", "pass", "passes", "passing"], 
+            ans: 1, 
+            reason: "【長主詞干擾】主詞是 'Everyone in the class'，但重點還是句首的 Did，所以動詞要用原形 pass。" 
+        },
+        { 
+            q: "How _____ they _____ to Taipei?", 
+            options: ["did / went", "did / go", "were / go", "did / goes"], 
+            ans: 1, 
+            reason: "【交通方式】How + Did + 主詞 + 原形 (go)。" 
+        },
+        { 
+            q: "The rain _____ _____ the game.", 
+            options: ["didn't stopped", "didn't stop", "wasn't stop", "not stop"], 
+            ans: 1, 
+            reason: "【否定句】didn't + 原形 (stop)。" 
+        },
+        { 
+            q: "Who _____ you _____ with last Sunday?", 
+            options: ["did / play", "did / played", "were / play", "was / played"], 
+            ans: 0, 
+            reason: "【WH問句】Who + Did + 主詞 + 原形 (play)。" 
+        },
+        { 
+            q: "_____ he _____ a good time?", 
+            options: ["Did / has", "Did / had", "Did / have", "Was / have"], 
+            ans: 2, 
+            reason: "【不規則動詞】Have 的過去式是 Had。但因為有 Did，必須用回原形 Have。" 
+        }
+    ];
+
+    let userAnswers = new Array(questions.length).fill(null);
+
+    // 初始化測驗
+    function initQuiz() {
+        const list = document.getElementById('questions-list');
+        questions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, optIndex) => {
+                optionsHtml += `<div class="option-btn" onclick="selectOption(${index}, ${optIndex}, this)">${opt}</div>`;
+            });
+
+            card.innerHTML = `
+                <span class="question-number">Question ${index + 1}</span>
+                <div class="question-text">${q.q}</div>
+                <div class="options-grid" id="options-${index}">
+                    ${optionsHtml}
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    // 選擇答案
+    window.selectOption = function(qIndex, optIndex, element) {
+        userAnswers[qIndex] = optIndex;
+        const parent = document.getElementById(`options-${qIndex}`);
+        const buttons = parent.getElementsByClassName('option-btn');
+        for (let btn of buttons) { btn.classList.remove('selected'); }
+        element.classList.add('selected');
+    }
+
+    // 交卷並計算分數
+    window.submitQuiz = function() {
+        // 檢查是否有未填答的題目
+        if(userAnswers.includes(null)){
+            if(!confirm("還有題目沒寫完喔！確定要交卷嗎？(未寫完的會算錯)")) {
+                return;
+            }
+        }
+
+        let correctCount = 0;
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = '';
+
+        questions.forEach((q, index) => {
+            const isCorrect = userAnswers[index] === q.ans;
+            if (isCorrect) correctCount++;
+
+            const userChoiceText = userAnswers[index] !== null ? q.options[userAnswers[index]] : "未作答";
+            const correctText = q.options[q.ans];
+            const statusClass = isCorrect ? 'correct' : 'wrong';
+            const badge = isCorrect ? '✅ Correct' : '❌ Wrong';
+
+            const item = document.createElement('div');
+            item.className = `feedback-item ${statusClass}`;
+            item.innerHTML = `
+                <div style="font-size:0.9rem; color:#666; margin-bottom:5px;">${badge} - Question ${index+1}</div>
+                <div style="font-weight:bold; font-size:1.1rem; margin-bottom:10px;">${q.q}</div>
+                <div style="margin-bottom:5px;">你的答案: <span style="color:${isCorrect?'#00b894':'#d63031'}; font-weight:bold;">${userChoiceText}</span></div>
+                ${!isCorrect ? `<div style="margin-bottom:5px;">正確答案: <span style="color:#00b894; font-weight:bold;">${correctText}</span></div>` : ''}
+                <div class="explanation">💡 <b>解析：</b>${q.reason}</div>
+            `;
+            feedbackList.appendChild(item);
+        });
+
+        const score = Math.round((correctCount / questions.length) * 100);
+
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('quiz-header').style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+        
+        const scoreDisplay = document.getElementById('score-display');
+        scoreDisplay.innerText = score;
+        
+        const scoreMessage = document.getElementById('score-message');
+        if(score === 100) {
+            scoreMessage.innerText = "太神了！國中程度的題目也難不倒你！🏆";
+        } else if (score >= 80) {
+            scoreMessage.innerText = "非常厲害！已經有國一的水準了！✨";
+        } else if (score >= 60) {
+            scoreMessage.innerText = "還不錯，注意一下 Was 和 Did 的差別會更強！💪";
+        } else {
+            scoreMessage.innerText = "這份比較難喔！別氣餒，看解析學起來！🔥";
+        }
+
+        window.scrollTo(0,0);
+    }
+
+    initQuiz();
+</script>
+
+</body>
+</html>
