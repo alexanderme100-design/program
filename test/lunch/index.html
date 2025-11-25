@@ -320,19 +320,31 @@
         if (shouldRefresh) fetchHolidays();
     }
 
+    // --- 關鍵修正：先儲存密碼到 local variable，再傳給後端 ---
     function saveAdminHolidays() {
         if (!confirm("確定要儲存這些不供餐日設定嗎？")) return;
+        
         const newHolidays = Array.from(adminHolidaySet).sort();
-        // 1. 立即更新本地
+        const currentPwd = adminPassword; // 🔴 先暫存密碼，避免 exitAdminMode 清空它
+
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+        
+        // 1. 樂觀更新：立即更新前端顯示
         HOLIDAYS = newHolidays; 
         newHolidays.forEach(date => { if (selectedDatesSet.has(date)) selectedDatesSet.delete(date); });
         updateSummary();
-        exitAdminMode(false); // 2. 退出並立即重繪 (不從伺服器抓，避免時間差)
+        exitAdminMode(false); // 退出模式 (會清空 adminPassword)
 
-        // 3. 背景傳送 (Fail Safe)
-        safeFetch({ action: 'updateHolidays', holidays: newHolidays, password: adminPassword })
-        .then(data => { if (data.result !== 'success') alert("背景儲存失敗：" + data.error); })
-        .catch(err => alert("連線錯誤：" + err.message));
+        // 2. 背景傳送 (使用暫存的 currentPwd)
+        safeFetch({ action: 'updateHolidays', holidays: newHolidays, password: currentPwd })
+        .then(data => { 
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            if (data.result !== 'success') alert("背景儲存失敗：" + data.error); 
+        })
+        .catch(err => { 
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            alert("連線錯誤：" + err.message); 
+        });
     }
 
     function handleFormSubmit(e) {
