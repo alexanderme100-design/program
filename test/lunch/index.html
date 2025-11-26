@@ -215,7 +215,7 @@
     const MAKEUP_DAYS = ["2025/2/8"];
     const DEFAULT_HOLIDAYS = ["2025/1/1", "2025/1/27", "2025/1/28", "2025/1/29", "2025/1/30", "2025/1/31", "2025/2/28", "2025/4/3", "2025/4/4"];
     
-    const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","週五籃球班B","週五籃球班C","其他"];
+    const CLUB_OPTIONS = ["全部未參加","1.2年級課後班(一.四.五)","3.4年級課後班(五)","1.2年級羽球隊(一. 四.五)","3.4年級羽球隊(五)","週三(羽球隊)","週三籃球班A","週三籃球班B","週三籃球班C","週三才藝班(流行mv舞蹈班)","週三才藝班(英語初階自然發音班P4-P6)班","週三才藝班(英語社團基礎字彙班V1-V3)","週三才藝班(幸福捏一下A)","週三才藝班(創意DIY-禮品＆點心小鋪)","週三才藝班(兒童創意美術)","週三才藝班(數學桌遊社寶可夢)","週三才藝班(思丁(STEAM)創客好小子)","週三才藝班(動漫平板繪圖與手作創作營)","週三才藝班(黑鷹足球社團課)","週五籃球班A","其他"];
 
     // 系統運作變數
     let HOLIDAYS = [...DEFAULT_HOLIDAYS];
@@ -326,11 +326,75 @@
       if (days===0 || currentStudentCount<=0) { btn.disabled=true; btn.innerText = (days===0?"請選擇停餐日期":"請輸入正確人數"); } else { btn.disabled=false; btn.innerText="提交申請"; }
     }
     
+    // --- 新版社團渲染邏輯 (視覺優化) ---
+    function getClubStyle(name) {
+        // 預設樣式
+        let s = { icon: "fa-shapes", color: "text-blue-500", bg: "peer-checked:bg-blue-50", border: "peer-checked:border-blue-500" };
+        
+        if (name.includes("未參加")) s = { icon: "fa-ban", color: "text-gray-500", bg: "peer-checked:bg-gray-100", border: "peer-checked:border-gray-400" };
+        else if (name.includes("課後班")) s = { icon: "fa-school", color: "text-emerald-500", bg: "peer-checked:bg-emerald-50", border: "peer-checked:border-emerald-500" };
+        else if (name.includes("羽球")) s = { icon: "fa-feather", color: "text-cyan-500", bg: "peer-checked:bg-cyan-50", border: "peer-checked:border-cyan-500" };
+        else if (name.includes("籃球")) s = { icon: "fa-basketball", color: "text-orange-500", bg: "peer-checked:bg-orange-50", border: "peer-checked:border-orange-500" };
+        else if (name.includes("足球")) s = { icon: "fa-futbol", color: "text-blue-600", bg: "peer-checked:bg-blue-50", border: "peer-checked:border-blue-600" };
+        else if (name.includes("舞蹈") || name.includes("mv")) s = { icon: "fa-music", color: "text-pink-500", bg: "peer-checked:bg-pink-50", border: "peer-checked:border-pink-500" };
+        else if (name.includes("英語")) s = { icon: "fa-language", color: "text-violet-500", bg: "peer-checked:bg-violet-50", border: "peer-checked:border-violet-500" };
+        else if (name.includes("美術") || name.includes("繪圖") || name.includes("DIY") || name.includes("捏")) s = { icon: "fa-palette", color: "text-fuchsia-500", bg: "peer-checked:bg-fuchsia-50", border: "peer-checked:border-fuchsia-500" };
+        else if (name.includes("數學") || name.includes("STEAM") || name.includes("創客")) s = { icon: "fa-rocket", color: "text-rose-500", bg: "peer-checked:bg-rose-50", border: "peer-checked:border-rose-500" };
+        
+        return s;
+    }
+
     function renderClubs() {
       const con = document.getElementById('club-container');
-      CLUB_OPTIONS.forEach((c,i) => { con.innerHTML += `<label class="flex items-start p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm cursor-pointer transition-all"><input type="checkbox" name="clubs" value="${c}" id="club_${i}" class="mt-0.5 flex-shrink-0"><span class="ml-3 text-sm text-gray-700 leading-tight select-none">${c}</span></label>`; });
-      const none = document.getElementById('club_0'); const others = Array.from(document.querySelectorAll('input[name="clubs"]:not(#club_0)'));
-      none.addEventListener('change', e => { if(e.target.checked) others.forEach(cb => { cb.checked=false; cb.disabled=true; cb.parentElement.classList.add('opacity-50','bg-gray-100'); }); else others.forEach(cb => { cb.disabled=false; cb.parentElement.classList.remove('opacity-50','bg-gray-100'); }); });
+      con.innerHTML = ''; // 先清空
+      
+      CLUB_OPTIONS.forEach((c,i) => {
+         const style = getClubStyle(c);
+         
+         const html = `
+         <label class="relative group cursor-pointer w-full">
+            <input type="checkbox" name="clubs" value="${c}" id="club_${i}" class="peer sr-only">
+            <div class="flex items-center p-3 rounded-2xl border-2 border-transparent bg-white ring-1 ring-gray-100 shadow-sm transition-all duration-200 
+                        hover:shadow-md hover:bg-gray-50 
+                        ${style.bg} ${style.border} peer-checked:ring-0 peer-checked:shadow-md">
+                
+                <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 mr-3 ${style.color} bg-opacity-20">
+                    <i class="fa-solid ${style.icon} text-lg"></i>
+                </div>
+                
+                <div class="flex-1">
+                    <span class="text-sm font-bold text-gray-700 peer-checked:text-gray-900 block leading-tight">${c}</span>
+                </div>
+
+                <div class="w-6 h-6 rounded-full border-2 border-gray-200 ml-2 flex items-center justify-center peer-checked:border-transparent peer-checked:bg-current ${style.color}">
+                    <i class="fa-solid fa-check text-white text-xs opacity-0 peer-checked:opacity-100 transform scale-50 peer-checked:scale-100 transition-all"></i>
+                </div>
+            </div>
+         </label>
+         `;
+         con.insertAdjacentHTML('beforeend', html);
+      });
+
+      // 重新綁定 "全部未參加" 的互斥邏輯
+      const none = document.getElementById('club_0'); 
+      const others = Array.from(document.querySelectorAll('input[name="clubs"]:not(#club_0)'));
+      
+      none.addEventListener('change', e => { 
+          if(e.target.checked) {
+              others.forEach(cb => { 
+                  cb.checked=false; 
+                  cb.disabled=true; 
+                  // 視覺上的禁用效果 (針對父容器 label 加上透明度與灰階)
+                  cb.parentElement.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed');
+              }); 
+          } else { 
+              others.forEach(cb => { 
+                  cb.disabled=false; 
+                  // 恢復視覺效果
+                  cb.parentElement.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed');
+              }); 
+          } 
+      });
     }
     
     function updateDashboard() {
@@ -368,7 +432,7 @@
     function onSuccess() {
       document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('refundForm').reset(); selectedDatesSet.clear();
       currentCalendarBaseDate = new Date(); renderCalendar(); toggleStudentCount(false); fetchHolidays(); updateSummary();
-      const others = Array.from(document.querySelectorAll('input[name="clubs"]:not(#club_0)')); others.forEach(cb => { cb.disabled=false; cb.parentElement.classList.remove('opacity-50','bg-gray-100'); });
+      const others = Array.from(document.querySelectorAll('input[name="clubs"]:not(#club_0)')); others.forEach(cb => { cb.disabled=false; cb.parentElement.classList.remove('opacity-50','grayscale', 'cursor-not-allowed'); });
       document.getElementById('successModal').classList.remove('hidden');
     }
     function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
