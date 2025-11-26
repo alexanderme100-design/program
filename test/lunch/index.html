@@ -38,36 +38,70 @@
     input[type="checkbox"]:checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: white; font-size: 0.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
     /* Calendar Styling */
-    .calendar-day { border-radius: 50%; font-weight: 500; position: relative; transition: all 0.1s; }
-    .calendar-day.selected { background-color: #007AFF !important; color: white !important; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); }
-    .calendar-day.today { font-weight: 700; color: #007AFF; }
-    .calendar-day.today::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #007AFF; border-radius: 50%; }
-    .calendar-day.today.selected { color: white; }
+    .calendar-day { 
+        border-radius: 12px; /* 稍微方一點的圓角 */
+        font-weight: 500; 
+        position: relative; 
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+    }
+    
+    /* 選中狀態：漸層藍色立體按鈕 */
+    .calendar-day.selected { 
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important; 
+        color: white !important; 
+        font-weight: 700; 
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+        transform: scale(1.05);
+        z-index: 10;
+        border: none;
+    }
+    
+    /* 今天：外圈光暈與文字加粗 */
+    .calendar-day.today { 
+        font-weight: 800; 
+        color: #2563EB; 
+        background-color: #EFF6FF;
+        border: 1px solid #BFDBFE;
+    }
+    .calendar-day.today::after { 
+        content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); 
+        width: 4px; height: 4px; background-color: #2563EB; border-radius: 50%; 
+    }
+    .calendar-day.today.selected { 
+        color: white; 
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+        border: none;
+    }
     .calendar-day.today.selected::after { background-color: white; }
 
-    /* 禁用狀態 (優先權最高，強制覆蓋其他顏色) */
+    /* 禁用狀態 */
     .calendar-day.is-disabled { 
-        color: #D1D5DB !important; 
-        text-decoration: line-through; 
-        opacity: 0.7; 
+        color: #9CA3AF !important; 
+        opacity: 0.6; 
         cursor: not-allowed !important; 
         background-color: transparent !important;
         border: 1px solid transparent;
     }
     
-    /* 特殊：被設定為假日的不供餐日 (即使過期也要顯示紅色，但不可選) */
+    /* 假日鎖定 (學校設定) */
     .calendar-day.holiday-locked { 
-        color: #FF3B30 !important; /* 強制紅色 */
+        color: #EF4444 !important; /* 紅色 */
+        background-color: #FEF2F2 !important; /* 淡紅底 */
         text-decoration: line-through;
-        opacity: 0.6;
+        opacity: 0.8;
         cursor: not-allowed !important;
+        border: 1px dashed #FECACA;
     }
     
-    /* 一般週末文字紅 */
-    .calendar-day.holiday-text { color: #FF3B30; }
+    /* 週末紅字 (一般) */
+    .calendar-day.holiday-text { color: #EF4444; }
     
     /* 補班日 (黃底) */
-    .calendar-day.makeup-day { background-color: #FEF3C7; color: #D97706; }
+    .calendar-day.makeup-day { 
+        background-color: #FFFBEB; 
+        color: #D97706; 
+        border: 1px solid #FDE68A;
+    }
 
     .required::after { content: " *"; color: #FF3B30; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -80,7 +114,7 @@
     <!-- Header -->
     <div class="mb-6 text-center sm:text-left">
       <h1 class="text-3xl font-bold text-gray-900 tracking-tight flex items-center justify-center sm:justify-start">
-        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md">
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white mr-3 shadow-md bg-gradient-to-br from-blue-500 to-blue-600">
            <i class="fa-solid fa-utensils text-lg"></i>
         </div>
         午餐停餐/退費申請
@@ -89,11 +123,11 @@
     </div>
 
     <!-- 規則 -->
-    <div class="ios-card p-4 sm:p-5 mb-6 bg-blue-50/50 border-blue-100">
+    <div class="ios-card p-4 sm:p-5 mb-6 bg-gradient-to-br from-blue-50 to-white border-blue-100">
       <h3 class="font-bold text-blue-600 mb-3 flex items-center text-sm uppercase tracking-wide">
         <i class="fa-solid fa-circle-info mr-2"></i> 申請規則與須知
       </h3>
-      <div id="rule-display" class="mb-4 bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+      <div id="rule-display" class="mb-4 bg-white p-3 rounded-xl border border-blue-100 shadow-sm/50">
          <p class="text-xs text-gray-400 mb-1">系統自動計算截算日...</p>
       </div>
       <ul class="space-y-3 text-sm text-gray-700">
@@ -105,7 +139,7 @@
 
     <form id="refundForm" class="space-y-6" onsubmit="handleFormSubmit(event)">
       <div class="ios-card p-5 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center"><span class="bg-gray-100 text-gray-500 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2">1</span>基本資料</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center"><span class="bg-blue-100 text-blue-600 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2 font-bold">1</span>基本資料</h2>
         <div class="space-y-6">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-3 required">停餐事由</label>
@@ -141,44 +175,50 @@
         </div>
       </div>
 
-      <div class="ios-card p-5 sm:p-6 relative">
-        <div class="flex items-center justify-between mb-5">
-            <h2 class="text-lg font-bold text-gray-900 flex items-center"><span class="bg-gray-100 text-gray-500 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2">2</span>選擇日期</h2>
-            <div class="flex space-x-1">
-                <button type="button" onclick="changeMonth(-1)" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
-                <button type="button" onclick="changeMonth(1)" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+      <div class="ios-card p-5 sm:p-6 relative overflow-hidden">
+        <!-- 裝飾背景球 -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full opacity-50 pointer-events-none"></div>
+
+        <div class="flex items-center justify-between mb-5 relative z-10">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center"><span class="bg-blue-100 text-blue-600 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2 font-bold">2</span>選擇日期</h2>
+            <div class="flex space-x-1 bg-gray-100 p-1 rounded-full">
+                <button type="button" onclick="changeMonth(-1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <button type="button" onclick="changeMonth(1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"><i class="fa-solid fa-chevron-right text-xs"></i></button>
             </div>
         </div>
-        <div class="bg-gray-50 rounded-2xl p-4 mb-4">
+        
+        <!-- 日曆容器：背景色改為更清爽的淡藍色漸層 -->
+        <div class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 mb-4 border border-blue-50">
           <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-bold text-gray-700">停餐日曆</span>
-            <div class="flex items-center text-xs text-gray-400 space-x-3">
-              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-1"></span>選取</span>
-              <span class="flex items-center"><span class="w-2 h-2 rounded-full border border-gray-300 mr-1"></span>可選</span>
-              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-gray-200 mr-1"></span>不可</span>
+            <span class="text-sm font-bold text-slate-700 flex items-center"><i class="fa-regular fa-calendar mr-2 text-blue-400"></i>停餐日曆</span>
+            <div class="flex items-center text-[10px] sm:text-xs text-gray-400 space-x-2 sm:space-x-3">
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-1 shadow-sm"></span>選取</span>
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full border border-gray-300 mr-1 bg-white"></span>可選</span>
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-red-100 mr-1 border border-red-200"></span>不可</span>
             </div>
           </div>
-          <p id="calendar-hint" class="text-xs text-gray-400 mb-2"><i class="fa-solid fa-hand-point-up mr-1"></i>點擊灰色日期可查看原因</p>
+          <p id="calendar-hint" class="text-xs text-gray-400 mb-2 flex items-center"><i class="fa-solid fa-circle-info mr-1 text-blue-300"></i>點擊灰色/紅色日期可查看原因</p>
           <div id="calendar-wrapper" class="space-y-6 select-none"></div>
         </div>
-        <div class="bg-gray-900 rounded-2xl p-5 text-white shadow-lg">
-          <div class="grid grid-cols-3 gap-4 text-center divide-x divide-gray-700">
-            <div><div class="text-xs text-gray-400 mb-1">人數</div><input type="text" id="displayStudentCount" readonly class="bg-transparent text-center text-xl font-bold w-full text-white outline-none" value="1"></div>
-            <div><div class="text-xs text-gray-400 mb-1">天數</div><input type="number" id="totalDays" name="totalDays" readonly class="bg-transparent text-center text-xl font-bold w-full text-white outline-none" value="0"></div>
-            <div><div class="text-xs text-gray-400 mb-1">總金額</div><div class="text-xl font-bold text-blue-400">$<span id="totalAmount">0</span></div></div>
+
+        <div class="bg-slate-800 rounded-2xl p-5 text-white shadow-xl shadow-slate-200 relative z-10">
+          <div class="grid grid-cols-3 gap-4 text-center divide-x divide-slate-600">
+            <div><div class="text-xs text-slate-400 mb-1">人數</div><input type="text" id="displayStudentCount" readonly class="bg-transparent text-center text-xl font-bold w-full text-white outline-none font-mono" value="1"></div>
+            <div><div class="text-xs text-slate-400 mb-1">天數</div><input type="number" id="totalDays" name="totalDays" readonly class="bg-transparent text-center text-xl font-bold w-full text-white outline-none font-mono" value="0"></div>
+            <div><div class="text-xs text-slate-400 mb-1">總金額</div><div class="text-xl font-bold text-blue-300 font-mono">$<span id="totalAmount">0</span></div></div>
           </div>
-          <div id="selected-dates-display" class="mt-4 pt-4 border-t border-gray-700 text-xs text-gray-300 min-h-[30px] flex flex-wrap gap-2"><span class="italic opacity-50">請選擇上方日期...</span></div>
+          <div id="selected-dates-display" class="mt-4 pt-4 border-t border-slate-700 text-xs text-slate-300 min-h-[30px] flex flex-wrap gap-2"><span class="italic opacity-50">請選擇上方日期...</span></div>
           <input type="hidden" id="dateInput" name="dateInput" required>
         </div>
       </div>
 
       <div class="ios-card p-5 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center"><span class="bg-gray-100 text-gray-500 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2">3</span>社團調查</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center"><span class="bg-blue-100 text-blue-600 w-7 h-7 rounded-full flex items-center justify-center text-xs mr-2 font-bold">3</span>社團調查</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="club-container"></div>
       </div>
 
       <div class="pb-6">
-        <button type="submit" id="submitBtn" class="ios-btn-primary w-full py-4 text-lg shadow-lg hover:shadow-xl shadow-blue-500/20 disabled:shadow-none">提交申請</button>
+        <button type="submit" id="submitBtn" class="ios-btn-primary w-full py-4 text-lg shadow-lg hover:shadow-xl shadow-blue-500/20 disabled:shadow-none bg-gradient-to-r from-blue-600 to-blue-500">提交申請</button>
       </div>
     </form>
     
@@ -190,7 +230,7 @@
     </div>
     <div id="successModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div class="modal-content bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full">
-        <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fa-solid fa-check"></i></div>
+        <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm"><i class="fa-solid fa-check"></i></div>
         <h3 class="text-2xl font-bold text-gray-900 mb-2">申請成功</h3>
         <p class="text-gray-500 mb-8">系統已收到您的資料，<br>請留意退費通知。</p>
         <button onclick="closeSuccessModal()" class="ios-btn-primary w-full py-3.5">完成</button>
@@ -198,7 +238,7 @@
     </div>
     <div id="infoModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div class="modal-content bg-white p-6 rounded-2xl shadow-2xl text-center max-w-xs w-full">
-        <div class="mb-3 text-yellow-500 text-4xl"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <div class="mb-3 text-amber-400 text-4xl drop-shadow-sm"><i class="fa-solid fa-circle-exclamation"></i></div>
         <h3 class="text-lg font-bold text-gray-900 mb-2" id="infoModalTitle">提示</h3>
         <p class="text-gray-600 mb-6 text-sm" id="infoModalMessage">訊息內容</p>
         <button onclick="closeInfoModal()" class="bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold py-2.5 px-4 rounded-xl w-full transition-colors">我知道了</button>
@@ -317,7 +357,7 @@
       const sorted = Array.from(selectedDatesSet).sort((a,b) => new Date(a)-new Date(b));
       const display = document.getElementById('selected-dates-display');
       if (sorted.length===0) display.innerHTML = '<span class="italic opacity-50">請選擇上方日期...</span>';
-      else display.innerHTML = sorted.map(d => `<span class="bg-blue-500 text-white px-2 py-0.5 rounded-md">${d}</span>`).join('');
+      else display.innerHTML = sorted.map(d => `<span class="bg-blue-500 text-white px-2 py-0.5 rounded-md shadow-sm border border-blue-600">${d}</span>`).join('');
       document.getElementById('dateInput').value = sorted.join(', ');
       const days = sorted.length;
       document.getElementById('totalDays').value = days;
@@ -445,13 +485,23 @@
       const rocYear = displayDate.getFullYear() - 1911;
       
       const title = document.createElement('div');
-      title.className = "text-center font-bold text-gray-800 mb-3 text-base";
+      title.className = "text-center font-bold text-slate-700 mb-4 text-base bg-white/50 py-1 rounded-lg mx-auto w-1/2 shadow-sm border border-white";
       title.innerText = `民國${rocYear}年 ${displayDate.getMonth() + 1}月`;
       monthContainer.appendChild(title);
       
       const weekHeader = document.createElement('div');
-      weekHeader.className = "grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider";
-      ['日','一','二','三','四','五','六'].forEach(d => { const s = document.createElement('span'); s.innerText = d; weekHeader.appendChild(s); });
+      weekHeader.className = "grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-bold uppercase tracking-wider";
+      
+      const weekDays = ['日','一','二','三','四','五','六'];
+      weekDays.forEach((d, i) => { 
+        const s = document.createElement('span'); 
+        s.innerText = d; 
+        // 週末色彩邏輯
+        if (i === 0) s.className = "text-red-500"; // 週日紅
+        else if (i === 6) s.className = "text-orange-500"; // 週六橘
+        else s.className = "text-slate-400";
+        weekHeader.appendChild(s); 
+      });
       monthContainer.appendChild(weekHeader);
       
       const grid = document.createElement('div');
@@ -469,7 +519,7 @@
         const dateStr = formatDateKey(dateObj); 
         const btn = document.createElement('button');
         btn.type = "button"; btn.innerText = d;
-        btn.className = "calendar-day h-10 w-full flex items-center justify-center text-sm transition-transform active:scale-90";
+        btn.className = "calendar-day h-10 w-full flex items-center justify-center text-sm hover:bg-white hover:shadow-sm"; // 基礎樣式
         
         btn.style.color = '';
         btn.style.backgroundColor = '';
