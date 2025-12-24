@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>學生通勤方式統計分析報告</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -15,97 +13,116 @@
         }
         .chart-container {
             position: relative;
-            height: 40vh;
+            height: 380px;
             width: 100%;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased pb-12">
+<body class="gradient-bg text-slate-900 antialiased pb-20">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- 頁首 -->
-        <header class="py-10 text-center">
-            <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight mb-2">
+        <header class="py-12 text-center">
+            <div class="inline-block px-4 py-1.5 mb-4 text-sm font-semibold tracking-wide text-blue-600 uppercase bg-blue-100 rounded-full">
+                數據整合分析看板
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight mb-4">
                 學生通勤方式統計分析報告
             </h1>
-            <p class="text-slate-500 text-lg">全校數據彙整(樣本總數：2,459人)</p>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto">
+                基於最新各年級詳細原始資料彙整 (樣本總數：2,459人)。
+            </p>
         </header>
 
-        <!-- 關鍵數據卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">上學最主要方式</p>
-                <p class="text-2xl font-bold text-blue-600">家長機車接送</p>
-                <p class="text-sm text-slate-400 mt-2">約 1,338 人 (54.4%)</p>
+        <!-- 關鍵指標卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-sm font-medium text-slate-500 mb-1">上學最高頻次</p>
+                <p class="text-2xl font-bold text-blue-600">機車接送 (53.6%)</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">放學最主要方式</p>
-                <p class="text-2xl font-bold text-rose-500">安親班接送</p>
-                <p class="text-sm text-slate-400 mt-2">約 1,036 人 (42.1%)</p>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-sm font-medium text-slate-500 mb-1">放學最高頻次</p>
+                <p class="text-2xl font-bold text-rose-600">安親班接送 (43.4%)</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">獨立性增長</p>
-                <p class="text-2xl font-bold text-emerald-600">自行走路</p>
-                <p class="text-sm text-slate-400 mt-2">高年級佔該項 67% 以上</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">數據樣本總計</p>
-                <p class="text-2xl font-bold text-slate-800">2,459</p>
-                <p class="text-sm text-slate-400 mt-2">已依比例校正人數</p>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-sm font-medium text-slate-500 mb-1">步行總人數</p>
+                <p class="text-2xl font-bold text-emerald-600">923 人次</p>
             </div>
         </div>
 
-        <main class="space-y-10">
-            <!-- 圖表區塊 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- 圖表一：總覽 -->
-                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-                        各方式上下學人數對比 (總額：2,459)
-                    </h3>
-                    <div class="chart-container">
-                        <canvas id="methodChart"></canvas>
-                    </div>
-                </section>
-
-                <!-- 圖表二：趨勢 -->
-                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
-                        「自行走路」跨年級增長趨勢 (校正後)
-                    </h3>
-                    <div class="chart-container">
-                        <canvas id="walkTrendChart"></canvas>
-                    </div>
-                </section>
+        <!-- 核心數據合併看板 -->
+        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+            <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                    <svg class="w-7 h-7 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    通勤模式與獨立性成長分析看板
+                </h2>
+                <p class="text-slate-500 mt-1">左側顯示全校整體比例，右側顯示隨年級成長的步行變化。</p>
             </div>
-        </main>
+            
+            <div class="p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- 左側：全校分佈 -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-700">全校通勤方式分佈 (總量對比)</h3>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Bar Chart</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="methodChart"></canvas>
+                        </div>
+                        <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                <strong class="text-slate-800">結構洞察：</strong> 上學時段極度依賴機車接送，放學則因家長工作因素，轉由安親班承擔近 44% 的接駁需求。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 右側：年級趨勢 -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-700">「自行走路」年級遞增趨勢</h3>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Line Trend</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="walkTrendChart"></canvas>
+                        </div>
+                        <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                <strong class="text-slate-800">成長洞察：</strong> 四年級是獨立通學的「分水嶺」，人數從三年級的 43 人翻倍至 90 人，至六年級達到峰值。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 通用配置
             Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
             Chart.defaults.color = '#64748b';
 
-            // --- 圖表一：各方式對比 (基準 2459) ---
+            // --- 圖表一：各方式對比 (Bar) ---
             const ctx1 = document.getElementById('methodChart').getContext('2d');
             new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'],
+                    labels: ['安親班接送', '自行走路', '搭乘大眾運輸', '家長陪同走路', '家長開車接送', '家長機車接送'],
                     datasets: [
                         {
                             label: '上學人數',
-                            data: [0, 441, 16, 300, 315, 1338, 49], 
-                            backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                            data: [0, 456, 50, 310, 325, 1318], 
+                            backgroundColor: '#3b82f6',
                             borderRadius: 6
                         },
                         {
                             label: '放學人數',
-                            data: [1036, 454, 25, 204, 111, 576, 53], 
-                            backgroundColor: 'rgba(225, 29, 72, 0.8)',
+                            data: [1068, 467, 56, 206, 117, 545], 
+                            backgroundColor: '#f43f5e',
                             borderRadius: 6
                         }
                     ]
@@ -115,20 +132,20 @@
                     maintainAspectRatio: false,
                     indexAxis: 'y', 
                     plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: { padding: 12 }
+                        legend: { position: 'bottom' }
                     },
                     scales: {
-                        x: { grid: { display: false } }
+                        x: { grid: { display: false } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { weight: '500' } } }
                     }
                 }
             });
 
-            // --- 圖表二：走路趨勢 (基準 2459) ---
+            // --- 圖表二：走路趨勢 (Line) ---
             const ctx2 = document.getElementById('walkTrendChart').getContext('2d');
-            const gradientBlue = ctx2.createLinearGradient(0, 0, 0, 400);
-            gradientBlue.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
-            gradientBlue.addColorStop(1, 'rgba(37, 99, 235, 0)');
+            const grad = ctx2.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
+            grad.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
             new Chart(ctx2, {
                 type: 'line',
@@ -136,24 +153,28 @@
                     labels: ['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'],
                     datasets: [
                         {
-                            label: '上學',
-                            data: [26, 29, 42, 87, 108, 149], 
-                            borderColor: '#2563eb',
-                            backgroundColor: gradientBlue,
+                            label: '上學 (自行)',
+                            data: [27, 30, 43, 90, 111, 155], 
+                            borderColor: '#10b981',
+                            borderWidth: 3,
+                            backgroundColor: grad,
                             fill: true,
                             tension: 0.4,
-                            pointBackgroundColor: '#2563eb',
-                            pointRadius: 4
+                            pointRadius: 5,
+                            pointBackgroundColor: '#fff',
+                            pointBorderWidth: 2
                         },
                         {
-                            label: '放學',
-                            data: [16, 19, 64, 94, 115, 146], 
-                            borderColor: '#e11d48',
-                            backgroundColor: 'transparent',
+                            label: '放學 (自行)',
+                            data: [17, 20, 68, 99, 122, 141], 
+                            borderColor: '#f43f5e',
+                            borderWidth: 3,
                             fill: false,
                             tension: 0.4,
-                            pointBackgroundColor: '#e11d48',
-                            pointRadius: 4
+                            pointRadius: 5,
+                            pointBackgroundColor: '#fff',
+                            pointBorderWidth: 2,
+                            borderDash: [5, 5]
                         }
                     ]
                 },
