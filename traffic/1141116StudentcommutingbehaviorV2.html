@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>各年級學生通學方式互動分析儀表板</title>
+    <title>各年級學生通學方式分析儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
                 <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
                     各年級學生通學方式分析儀表板
                 </h1>
-                <p class="text-slate-500 text-lg mt-1">基於圖片數據按比例校正 (總樣本數：2,459)</p>
+                <p class="text-slate-500 text-lg mt-1">依據最新上傳數據更新 (總樣本數：2,459)</p>
             </div>
 
             <!-- 人數/百分比切換 -->
@@ -94,7 +94,7 @@
                 <!-- 獨立性指標 -->
                 <div class="bg-slate-800 p-6 rounded-3xl shadow-lg text-white">
                     <div class="flex justify-between items-start mb-4">
-                        <p class="text-sm font-medium text-slate-400">獨立通學指標<br><span class="text-xs">(自行走路)</span></p>
+                        <p class="text-sm font-medium text-slate-400">獨立通學佔比<br><span class="text-xs">(自行走路)</span></p>
                         <span id="ind-trend" class="text-emerald-400 text-xs font-bold">數據已同步</span>
                     </div>
                     <div class="flex items-baseline gap-1">
@@ -106,7 +106,7 @@
                         </div>
                     </div>
                     <p class="text-[10px] text-slate-500 mt-4 leading-relaxed">
-                        * 依原始比例將圖片數據轉換為全校 2,459 人。
+                        * 已根據提供之各年級數據更新，總額精確符合 2,459 人。
                     </p>
                 </div>
             </div>
@@ -115,17 +115,16 @@
 
     <script>
         /**
-         * 數據校正邏輯：
-         * 全校上學總計：自行441, 陪走300, 開車315, 機車1338, 巴士49, 其它16 = 2459
-         * 全校放學總計：安親1036, 自行454, 陪走204, 開車111, 機車576, 巴士53, 其它25 = 2459
+         * 數據更新：基於最新提供的統計表格
+         * 順序：0:安親, 1:開車, 2:陪走, 3:機車, 4:大眾, 5:自行
          */
         const rawData = {
-            1: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 26, 2, 80, 70, 226, 6], pm: [200, 16, 4, 60, 25, 100, 5] },
-            2: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 29, 3, 75, 65, 233, 5], pm: [210, 19, 5, 55, 20, 95, 6] },
-            3: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 42, 2, 50, 55, 253, 8], pm: [190, 64, 4, 35, 15, 90, 12] },
-            4: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 87, 3, 40, 45, 225, 10], pm: [160, 94, 5, 25, 10, 105, 11] },
-            5: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 108, 4, 30, 40, 218, 10], pm: [140, 115, 4, 15, 25, 100, 11] },
-            6: { labels: ['安親班接送', '自行走路', '其它方式', '家長陪同走路', '家長開車接送', '家長騎機車接送', '搭乘大眾運輸'], am: [0, 149, 2, 25, 40, 183, 10], pm: [136, 146, 3, 14, 16, 86, 8] }
+            1: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 44, 72, 199, 11, 27], pm: [156, 20, 48, 104, 8, 17] },
+            2: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 53, 57, 206, 2, 30], pm: [163, 19, 38, 103, 5, 20] },
+            3: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 53, 52, 259, 6, 43], pm: [216, 15, 30, 79, 5, 68] },
+            4: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 57, 58, 256, 4, 90], pm: [178, 17, 42, 120, 9, 99] },
+            5: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 45, 38, 238, 7, 111], pm: [195, 13, 30, 69, 10, 122] },
+            6: { labels: ['安親班接送', '家長開車接送', '家長陪同走路', '家長騎機車接送', '搭乘大眾運輸工具', '自行走路'], am: [0, 73, 33, 160, 20, 155], pm: [160, 33, 18, 70, 19, 141] }
         };
 
         let currentGrade = 1;
@@ -148,11 +147,11 @@
             const amPercents = data.am.map(v => (v / amTotal * 100).toFixed(1));
             const pmPercents = data.pm.map(v => (v / pmTotal * 100).toFixed(1));
 
-            // 更新文字資訊
+            // 更新標題與樣本
             document.getElementById('display-grade-text').innerText = ['', '一年級', '二年級', '三年級', '四年級', '五年級', '六年級'][currentGrade];
             document.getElementById('sample-count').innerText = `本級總計: ${amTotal}人`;
 
-            // 更新側欄冠軍數據
+            // 更新冠軍卡片
             const amMaxIdx = data.am.indexOf(Math.max(...data.am));
             const pmMaxIdx = data.pm.indexOf(Math.max(...data.pm));
             document.getElementById('top-am-name').innerText = data.labels[amMaxIdx];
@@ -162,9 +161,9 @@
             document.getElementById('top-pm-val').innerText = pmPercents[pmMaxIdx] + '%';
             document.getElementById('top-pm-count').innerText = `(${data.pm[pmMaxIdx]}人)`;
 
-            // 更新獨立性進度條 (自行走路佔比)
-            const walkTotal = data.am[1] + data.pm[1];
-            const indPct = (walkTotal / (amTotal + pmTotal) * 100).toFixed(1);
+            // 更新自行走路佔比 (index 5)
+            const walkTotalCount = data.am[5] + data.pm[5];
+            const indPct = (walkTotalCount / (amTotal + pmTotal) * 100).toFixed(1);
             document.getElementById('ind-percent').innerText = indPct + '%';
             document.getElementById('ind-bar').style.width = indPct + '%';
 
@@ -180,18 +179,8 @@
                 data: {
                     labels: data.labels,
                     datasets: [
-                        { 
-                            label: '上學', 
-                            data: currentMode === 'count' ? data.am : amPercents, 
-                            backgroundColor: 'rgba(37, 99, 235, 0.8)', 
-                            borderRadius: 8 
-                        },
-                        { 
-                            label: '放學', 
-                            data: currentMode === 'count' ? data.pm : pmPercents, 
-                            backgroundColor: 'rgba(225, 29, 72, 0.8)', 
-                            borderRadius: 8 
-                        }
+                        { label: '上學', data: currentMode === 'count' ? data.am : amPercents, backgroundColor: 'rgba(37, 99, 235, 0.8)', borderRadius: 8 },
+                        { label: '放學', data: currentMode === 'count' ? data.pm : pmPercents, backgroundColor: 'rgba(225, 29, 72, 0.8)', borderRadius: 8 }
                     ]
                 },
                 options: {
@@ -210,7 +199,7 @@
                         }
                     },
                     scales: {
-                        x: { title: { display: true, text: currentMode === 'count' ? '人數' : '百分比 (%)' } }
+                        x: { title: { display: true, text: currentMode === 'count' ? '人數' : '佔比 (%)' } }
                     }
                 }
             });
